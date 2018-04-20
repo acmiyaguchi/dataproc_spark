@@ -15,6 +15,7 @@ In the code below, the following actions are taken:
 """
 
 from google.cloud import bigquery
+from google.api_core.exceptions import AlreadyExists
 
 
 def create_input_table(dataset_id, table_id, table_schema):
@@ -27,7 +28,11 @@ def create_input_table(dataset_id, table_id, table_schema):
     dataset = bigquery.Dataset(dataset_ref)
 
     # Create the new BigQuery dataset.
-    dataset = bigquery_client.create_dataset(dataset)
+    try:
+        dataset = bigquery_client.create_dataset(dataset)
+    except AlreadyExists:
+        print("dataset already exists")
+        return
 
     # In the new BigQuery dataset, create a new table.
     table_ref = dataset.table(table_id)
