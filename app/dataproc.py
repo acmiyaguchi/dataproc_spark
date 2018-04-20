@@ -13,6 +13,7 @@ In the following PySpark (Spark Python API) code, we take the following actions:
 
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.feature import VectorAssembler
+from pyspark.sql import functions as F
 
 
 def extract(spark, conf):
@@ -26,9 +27,6 @@ def extract(spark, conf):
     # Extract the JSON strings from the RDD.
     table_json = table_data.map(lambda x: x[1])
 
-    # Load the JSON strings as a Spark Dataframe.
-    natality_data = spark.read.json(table_json)
-
     features = [
         "mother_age", 
         "father_age", 
@@ -36,7 +34,16 @@ def extract(spark, conf):
         "weight_gain_pounds", 
         "apgar_5min"
     ]
-    assembler = VectorAssembler(inputcols=features, outputCol="features")
+    # Load the JSON strings as a Spark Dataframe.
+    natality_data = spark.read.json(table_json)
+    natality_data.printSchema()
+    natality_data = natality_data.select(
+        ["weight_pounds"] + 
+        [F.col(x).cast('double').alias(x) for x in features]
+    )
+    natality_data.printSchema()
+
+    assembler = VectorAssembler(inputCols=features, outputCol="features")
 
     # Create an input DataFrame for Spark ML using the above function.
     training_data = (

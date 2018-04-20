@@ -30,7 +30,7 @@ def create_input_table(dataset_id, table_id, table_schema):
     # Create the new BigQuery dataset.
     try:
         dataset = bigquery_client.create_dataset(dataset)
-    except AlreadyExists:
+    except:
         print("dataset already exists")
         return
 
