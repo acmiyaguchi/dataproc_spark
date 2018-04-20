@@ -55,8 +55,8 @@ def transform_show(training_data):
     lr = LinearRegression(maxIter=5, regParam=0.2, solver="normal")
     model = lr.fit(training_data)
     # Print the model summary.
-    print "Coefficients:" + str(model.coefficients)
-    print "Intercept:" + str(model.intercept)
-    print "R^2:" + str(model.summary.r2)
+    print("Coefficients:" + str(model.coefficients))
+    print("Intercept:" + str(model.intercept))
+    print("R^2:" + str(model.summary.r2))
     model.summary.residuals.show()
 

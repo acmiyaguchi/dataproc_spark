@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import click
-from pyspark import SparkSession
+from pyspark.sql import SparkSession
 from google.cloud.bigquery import SchemaField
 
 from .bigquery import create_input_table
