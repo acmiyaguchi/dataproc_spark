@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from google.cloud.bigquery import SchemaField
 
 from .bigquery import create_input_table
-from .dataproc import extract, train_show
+from .dataproc import extract, transform_show
 
 
 SCHEMA = [
@@ -19,8 +19,8 @@ SCHEMA = [
 
 
 @click.command()
-@click.option("dataset-id", default="natality_regression")
-@click.option("table-id", default="regression_input")
+@click.option("--dataset-id", default="natality_regression")
+@click.option("--table-id", default="regression_input")
 def main(dataset_id, table_id):
 
     create_input_table(dataset_id, table_id, SCHEMA)
@@ -52,4 +52,8 @@ def main(dataset_id, table_id):
     }
 
     train = extract(spark, conf)
-    train_show(train)
+    transform_show(train)
+
+
+if __name__ == '__main__':
+    main()
