@@ -10,6 +10,7 @@ In the following PySpark (Spark Python API) code, we take the following actions:
   * Compute a linear regression using Spark ML
 
 """
+import subprocess
 
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.feature import VectorAssembler
@@ -28,10 +29,10 @@ def extract(spark, conf):
     table_json = table_data.map(lambda x: x[1])
 
     features = [
-        "mother_age", 
-        "father_age", 
-        "gestation_weeks", 
-        "weight_gain_pounds", 
+        "mother_age",
+        "father_age",
+        "gestation_weeks",
+        "weight_gain_pounds",
         "apgar_5min"
     ]
     # Load the JSON strings as a Spark Dataframe.
@@ -49,7 +50,7 @@ def extract(spark, conf):
     training_data = (
         assembler
         .transform(natality_data)
-        .selectExpr("weight_pounds AS label", "features")
+        .selectExpr("cast(weight_pounds as FLOAT) AS label", "features")
     )
 
     return training_data
@@ -66,4 +67,19 @@ def transform_show(training_data):
     print("Intercept:" + str(model.intercept))
     print("R^2:" + str(model.summary.r2))
     model.summary.residuals.show()
+
+    return model.summary.residuals
+
+
+def load(dataframe, output, dataset, table):
+    files = output + '/part-*'
+    dataframe.write.json(output)
+    # Shell out to bq CLI to perform BigQuery import.
+    subprocess.check_call(
+        'bq load --source_format NEWLINE_DELIMITED_JSON '
+        '--replace '
+        '--autodetect '
+        '{dataset}.{table} {files}'
+        .format(dataset=dataset, table=table, files=files).split()
+    )
 

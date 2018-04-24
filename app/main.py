@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from google.cloud.bigquery import SchemaField
 
 from .bigquery import create_input_table
-from .dataproc import extract, transform_show
+from .dataproc import extract, transform_show, load
 
 
 SCHEMA = [
@@ -36,6 +36,7 @@ def main(dataset_id, table_id):
     # Set an input directory for reading data from Bigquery.
     todays_date = datetime.strftime(datetime.today(), "%Y-%m-%d-%H-%M-%S")
     input_directory = "gs://{}/tmp/natality-{}".format(bucket, todays_date)
+    output_directory = "gs://{}/tmp/output-{}".format(bucket, todays_date)
 
     # Set the configuration for importing data from BigQuery.
     # Specifically, make sure to set the project ID and bucket for Cloud Dataproc,
@@ -52,7 +53,8 @@ def main(dataset_id, table_id):
     }
 
     train = extract(spark, conf)
-    transform_show(train)
+    residuals = transform_show(train)
+    load(residuals, output_directory, dataset_id, "natality_residual")
 
 
 if __name__ == '__main__':
